@@ -41,7 +41,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-             //Lib test
+             //MultiplatformContacts
              implementation("io.github.lilytreasure:multiplatformContacts:1.0.1")
 
         }
@@ -58,7 +58,8 @@ android {
 
     defaultConfig {
         applicationId = "org.example.project"
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        minSdk = (findProperty("android.minSdk") as String).toInt()
+
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
