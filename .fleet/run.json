@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "android-app",
+            "name": "Android-app configuration",
+            "module": "",
+        },
+        
+    ]
+}
