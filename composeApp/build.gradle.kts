@@ -46,7 +46,6 @@ kotlin {
             //Data store
             api(libs.androidx.datastore.preferences.core)
             api(libs.androidx.datastore.core.okio)
-
         }
     }
 }

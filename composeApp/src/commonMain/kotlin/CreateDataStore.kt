@@ -8,19 +8,19 @@ import okio.Path.Companion.toPath
 
 expect fun createDataStore(): DataStore<Preferences>
 
-internal const val dataStoreFileName = "create_datastore.preferences_pb"
+internal const val dataStoreFileName = "playground_datastore.preferences_pb"
 
-private lateinit var dataStore: DataStore<Preferences>
+private lateinit var dataStoreInit: DataStore<Preferences>
 @OptIn(InternalCoroutinesApi::class)
 private val lock = SynchronizedObject()
 
 @OptIn(InternalCoroutinesApi::class)
 fun getDataStore(producePath: () -> String): DataStore<Preferences> =
     synchronized(lock) {
-        if (::dataStore.isInitialized) {
-            dataStore
+        if (::dataStoreInit.isInitialized) {
+            dataStoreInit
         } else {
             PreferenceDataStoreFactory.createWithPath(produceFile = { producePath().toPath() })
-                .also { dataStore = it }
+                .also { dataStoreInit= it }
         }
     }
