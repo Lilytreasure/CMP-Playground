@@ -43,6 +43,9 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
              //MultiplatformContacts
              implementation("io.github.lilytreasure:multiplatformContacts:1.0.1")
+            //Data store
+            api(libs.androidx.datastore.preferences.core)
+            api(libs.androidx.datastore.core.okio)
 
         }
     }
