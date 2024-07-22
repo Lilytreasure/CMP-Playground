@@ -1,15 +1,20 @@
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,6 +39,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 enum class BioAuthNotAvailable {
     BIOAUTH_NOT_AVAILABLE
 }
+
 val dataStore = createDataStore()
 
 @Composable
@@ -45,6 +51,18 @@ fun App() {
     var isAuthenticated by remember { mutableStateOf(false) }
     var authError by remember { mutableStateOf<String?>(null) }
     val openAlertDialog = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val dataStoreExample = stringPreferencesKey("data_store")
+    var dataStoreValue by remember { mutableStateOf("") }
+    var checked by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        dataStore.data.map { preferences ->
+            preferences[dataStoreExample] ?: ""
+        }.collectLatest {
+            dataStoreValue = it
+            checked = dataStoreValue == "Enabled"
+        }
+    }
 
     when {
         openAlertDialog.value -> {
@@ -67,36 +85,76 @@ fun App() {
                 .padding(top = 20.dp, start = 16.dp, end = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-         //Test
-            MultiplatformDataStore()
 
+            println("Data Store value is $dataStoreValue")
+            if (dataStoreValue.isBlank()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(text = "Enable Biometric")
+                        }
+                        Switch(
+                            checked = checked,
+                            onCheckedChange = { checkedValue ->
+                                checked = checkedValue
+                                val newValue = if (checked) "Enabled" else "Disabled"
+                                scope.launch {
+                                    dataStore.edit {
+                                        it[dataStoreExample] = newValue
+                                    }
+                                }
+                            },
+                            thumbContent = if (checked) {
+                                {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(SwitchDefaults.IconSize),
+                                    )
+                                }
+                            } else {
+                                null
+                            }
+                        )
+                        Text(
+                            "DataStore value is: $dataStoreValue",
+                            modifier = Modifier.padding(vertical = 18.dp)
+                        )
 
-
-//            Button(onClick = {
-//                coroutineScope.launch {
-//                    try {
-//                        isAuthenticated = biometricAuthenticator.authenticate()
-//                        authError = null
-//                    } catch (e: Exception) {
-//                        isAuthenticated = false
-//                        authError = e.message
-//                        if (e.message == BioAuthNotAvailable.BIOAUTH_NOT_AVAILABLE.toString()) {
-//                            openAlertDialog.value = true
-//                        }
-//                    }
-//                }
-//            }) {
-//                Text("Authenticate Biometric")
-//            }
-//
-//            if (isAuthenticated) {
-//                Text("Authenticated successfully!")
-//            }
-//
-//            authError?.let {
-//                Text("Authentication failed: $it")
-//            }
-
+                        if (checked) {
+                            Button(onClick = {
+                                coroutineScope.launch {
+                                    try {
+                                        isAuthenticated = biometricAuthenticator.authenticate()
+                                        authError = null
+                                    } catch (e: Exception) {
+                                        isAuthenticated = false
+                                        authError = e.message
+                                        if (e.message == BioAuthNotAvailable.BIOAUTH_NOT_AVAILABLE.toString()) {
+                                            openAlertDialog.value = true
+                                        }
+                                    }
+                                }
+                            }) {
+                                Text("Authenticate Biometric")
+                            }
+                        }
+                        if (isAuthenticated) {
+                            Text("Authenticated successfully!")
+                        }
+                        authError?.let {
+                            Text("Authentication failed: $it")
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -119,58 +177,6 @@ fun MultiplatformContactsLoader() {
         Text(text = phoneNumber)
     }
 }
-//Data Store Test
-@Composable
-fun MultiplatformDataStore(){
-    val scope = rememberCoroutineScope()
-    val  dataStoreExample = stringPreferencesKey("data_store")
-    var userInput by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    var dataStoreValue by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit){
-        dataStore.data.map { preferences ->
-            preferences[dataStoreExample] ?: ""
-        }.collectLatest {
-            dataStoreValue = it
-        }
-    }
-    println("Data Store value is $dataStoreValue")
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally){
-            Text("DataStore value is: $dataStoreValue", modifier = Modifier.padding(vertical = 18.dp))
-            OutlinedTextField(
-                value = userInput,
-                onValueChange = {userInput = it},
-                placeholder = { Text("Please enter some value") },
-                label = { Text("DataStore Input") },
-                isError = isError
-            )
-            if (isError){
-                Text("Input value should not be empty")
-            }
-
-            Button(onClick = {
-                if (userInput.isEmpty()){
-                    isError = true
-                } else {
-                    isError = false
-                    scope.launch {
-
-                        dataStore.edit {
-                            it[dataStoreExample] = userInput
-
-                        }
-                    }
-                }
-            }){
-                Text("Save to DataStore")
-            }
-        }
-    }
-
-}
-
 
 @Composable
 fun AlertDialogExample(
