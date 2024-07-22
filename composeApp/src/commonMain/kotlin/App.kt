@@ -63,7 +63,6 @@ fun App() {
             checked = dataStoreValue == "Enabled"
         }
     }
-
     when {
         openAlertDialog.value -> {
             AlertDialogExample(
@@ -87,11 +86,6 @@ fun App() {
         ) {
 
             println("Data Store value is $dataStoreValue")
-            if (dataStoreValue.isBlank()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -154,7 +148,7 @@ fun App() {
                         }
                     }
                 }
-            }
+
         }
     }
 }
