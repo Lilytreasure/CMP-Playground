@@ -40,9 +40,12 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation(compose.materialIconsExtended)
             implementation(compose.components.uiToolingPreview)
              //MultiplatformContacts
              implementation("io.github.lilytreasure:multiplatformContacts:1.0.1")
+            //Multiplatform Webview
+            implementation("io.github.lilytreasure:multiplatformWebView:1.0.1")
             //Data store
             api(libs.androidx.datastore.preferences.core)
             api(libs.androidx.datastore.core.okio)
